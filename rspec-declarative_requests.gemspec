@@ -11,6 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{A standardized structure for request specs in Rails.}
   spec.description   = %q{A standardized structure for request specs in Rails.}
+  spec.homepage      = 'https://github.com/tomdalling/rspec-declarative_requests'
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
