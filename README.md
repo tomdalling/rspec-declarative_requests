@@ -6,10 +6,26 @@ A standardized structure for request specs in Rails.
 ```ruby
 require 'rails_helper'
 
-RSpec.describe 'Widgets' do
-  describe 'GET /widgets/:id' do
-    let(:id) { FactoryBot.create(:widget).id }
-    it { is_expected.to have_http_status(:ok) }
+RSpec.describe 'GET /widgets/:id' do
+  let(:id) { FactoryBot.create(:widget).id }
+  it { is_expected.to have_http_status(:ok) }
+end
+
+# fancier
+RSpec.describe 'GET /widgets/:widget#id' do
+  let(:widget) { FactoryBot.create(:widget) }
+
+  it "responds with the widget" do
+    is_expected.to have_attributes(
+      status: 200,
+      content_type: 'application/json',
+      body: be_json( # `be_json` sold separately (from `saharspec` or `rspec-composable_json_matchers`)
+        widget: {
+          id: 7,
+          name: 'Kevin',
+        }
+      )
+    )
   end
 end
 ```
@@ -68,7 +84,7 @@ describe 'GET /thing' do
   # OR
 
   it "responds with 200 OK" do
-    expect(subject).to have_http_status(:ok)
+    expect(subject).to be_ok
   end
 end
 ```
