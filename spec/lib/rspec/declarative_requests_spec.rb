@@ -1,55 +1,70 @@
 require 'spec_helper'
+require_relative '../../support/rails_app'
+require 'rspec/rails'
 
-RSpec.describe RSpec::DeclarativeRequests do
-  include described_class::Helpers
+RSpec.describe RSpec::DeclarativeRequests, type: :request do
+  include described_class
 
-  describe 'GET /hello' do
+  let(:response_json) { JSON.parse(subject.body, symbolize_names: true) }
+
+  describe 'GET /test' do
     before do
-      params[:email] = 'johnny@example.com'
-      headers['Accept'] = 'application/json'
+      params[:user] = { name: 'johnny' }
+      headers['X-Custom-Header'] = 'wawawa'
     end
 
-    it 'calls the request method' do
-      expect(subject).to eq([
-        :get,
-        '/hello',
-        params: { email: 'johnny@example.com' },
-        headers: { 'Accept' => 'application/json' },
-      ])
+    it "sets `subject` to the response from making the request" do
+      is_expected.to have_http_status(:ok)
+      expect(response_json).to match(
+        params: { user: { name: 'johnny' } },
+        headers: include(HTTP_X_CUSTOM_HEADER: 'wawawa'),
+      )
     end
   end
 
   describe 'GET /:user_id/:widget_thing_id.html' do
     let(:user_id) { 123 }
     let(:widget_thing_id) { 456 }
+
     it 'interpolates lets into the path' do
-      expect(subject[1]).to eq('/123/456.html')
+      expect(response_json[:params]).to include(
+        user_id: "123",
+        widget_thing_id: "456",
+      )
     end
   end
 
   describe 'GET /:user#id/:widget#thing#id.html' do
-    let(:user) { double(id: 42) }
-    let(:widget) { double(thing: double(id: 84)) }
+    let(:user) { double(id: 'u42') }
+    let(:widget) { double(thing: double(id: 'w84')) }
+
     it 'interpolates lets into the path, calling methods' do
-      expect(subject[1]).to eq('/42/84.html')
+      expect(response_json[:params]).to include(
+        user_id: "u42",
+        widget_thing_id: "w84",
+      )
     end
   end
 
-  %w(GET POST PUT PATCH DELETE HEAD OPTIONS).each do |http_method|
-    describe "#{http_method} /test" do
-      it "handles the '#{http_method}' HTTP method" do
-        expect(subject[0..1]).to eq([http_method.downcase.to_sym, '/test'])
-      end
+  describe 'with the request in the example, instead of the group' do
+    specify 'GET /test' do
+      expect(subject).to be_ok
     end
   end
 
-  %i(get post put patch delete head options).each do |method_name|
-    define_method(method_name) do |*args|
-      @request = [method_name] + args
-    end
-  end
+  it 'has a nice error message' do
+    expect { subject }.to raise_error(described_class::Error) do |ex|
+      expect(ex.message).to eq(<<~END_ERROR)
+        Could not find an RSpec example group that looks like a request. The
+        describe/context description must start with an uppercase HTTP verb
+        like "GET" or "POST".
 
-  def response
-    @request
+        Try something like:
+
+          describe "GET /foo" do
+            it { is_expected.to have_http_status(:ok) }
+          end
+      END_ERROR
+    end
   end
 end
