@@ -2,6 +2,8 @@ PATH
   remote: .
   specs:
     rspec-declarative_requests (0.1.0)
+      rails (>= 5)
+      rspec-rails
 
 GEM
   remote: https://rubygems.org/
@@ -149,10 +151,8 @@ PLATFORMS
 DEPENDENCIES
   byebug
   gem-release
-  rails (~> 5.2)
   rspec-composable_json_matchers
   rspec-declarative_requests!
-  rspec-rails
   sqlite3
 
 BUNDLED WITH
