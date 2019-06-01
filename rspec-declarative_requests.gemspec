@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Tom Dalling"]
   spec.email         = ["tom" + "@" + "tomdalling.com"]
 
-  spec.summary       = %q{A standardized structure for request specs}
-  spec.description   = %q{A standardized structure for request specs}
+  spec.summary       = %q{A standardized structure for request specs in Rails.}
+  spec.description   = %q{A standardized structure for request specs in Rails.}
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
