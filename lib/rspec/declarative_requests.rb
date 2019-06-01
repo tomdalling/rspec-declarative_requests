@@ -48,7 +48,15 @@ module RSpec::DeclarativeRequests
     def interpolate(path, example)
       path.gsub(/\:[a-z_#]+/) do |match|
         match[1..-1].split('#').reduce(example) do |value, attr|
-          value.send(attr)
+          if value.is_a?(Hash)
+            case
+            when value.key?(attr) then value[attr]
+            when value.key?(attr.to_sym) then value[attr.to_sym]
+            else raise Error, "Couldn't find '#{attr}' while interpolating '#{match}' in the request path"
+            end
+          else
+            value.send(attr)
+          end
         end
       end
     end
